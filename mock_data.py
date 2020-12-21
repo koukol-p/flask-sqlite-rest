@@ -67,11 +67,16 @@ users = [
 conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
-create_table = "CREATE TABLE users (id INTEGER PRIMARY KEY, name text, username text, email text, pwd text)"
-
-query = "INSERT INTO users VALUES (?, ?, ?)"
+c.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name text, username text, email text, pwd text)")
+conn.commit()
+query = "INSERT INTO users VALUES (NULL, ?, ?, ?, ?)"
 for usr in users:
   c.execute(query, (usr['name'], usr['username'], usr['email'], usr['pwd']))
 
 conn.commit()
+result = c.execute("SELECT * FROM users")
+for r in result:
+  print(r)
+  
 conn.close()
+
