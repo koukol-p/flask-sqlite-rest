@@ -22,6 +22,7 @@ class User(Resource):
     def get(self, username):
       conn = sqlite3.connect('data.db')
       c = conn.cursor()
+      
       query = "SELECT id, name, username, email FROM users WHERE username=?"
       result = c.execute(query, (username, ))
       user = result.fetchone()
