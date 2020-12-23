@@ -1,6 +1,8 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, request
 import sqlite3
+from models.user import UserModel
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -20,16 +22,20 @@ class User_List(Resource):
 
 class User(Resource):
     def get(self, username):
-      conn = sqlite3.connect('data.db')
-      c = conn.cursor()
-      
-      query = "SELECT id, name, username, email FROM users WHERE username=?"
-      result = c.execute(query, (username, ))
-      user = result.fetchone()
-      conn.close()
+      user = UserModel.find_by_username(username)
       if user:
-        return {'user': {'id': user[0], 'name': user[1], 'username': user[2], 'email': user[3]}}, 200
-      return {'msg': 'user not found'}
+        return UserModel(*user).to_dict(), 200
+      return {'msg': 'user not found'}, 404
+    
+    def post(self, username):
+      req = request.get_json()
+      user_exists = UserModel.find_by_username(username)
+      if user_exists:
+        return {'msg': f"user with username '{username}' already exists"}, 409
+      else:
+        user = UserModel(req['name'], username, req['email'], req['password'])
+        user.insert()
+        return user.to_dict(), 201
       
         
 
